@@ -47,30 +47,29 @@ add_action( 'zip_downloads_hourly_event', array( 'Zip_Downloads', 'delete_direct
 
 class Zip_Downloads{
 
-	/**
-     * Enqueue the styles.
-     */
-    public static function styles() {
+      /**
+       * Enqueue the styles.
+       */
+       public static function styles() {
 
-        wp_enqueue_style( 'zd-style', plugins_url( '/css/zd-style.css' , __FILE__ ) );
-    }
+        	wp_enqueue_style( 'zd-style', plugins_url( '/css/zd-style.css' , __FILE__ ) );
+       }
 
-	/**
-     * Enqueue the scripts.
-     */
+       /**
+     	* Enqueue the scripts.
+        */
 	public static function scripts(){
 
 		wp_enqueue_script( 'jquery',
-            plugins_url( '/js/jquery-ui-1.9.0.custom.min.js' , __FILE__ ),
-            array(),
-            '1.11.1',
-            false 
-        );
+		            plugins_url( '/js/jquery-ui-1.9.0.custom.min.js' , __FILE__ ),
+		            array(),
+		            '1.11.1',
+		            false 
+	        );
 
-		wp_enqueue_script(
-			'zd-script',
-			plugins_url( '/js/zd-script.js' , __FILE__ ),
-			array( 'jquery' )
+		wp_enqueue_script( 'zd-script',
+			    plugins_url( '/js/zd-script.js' , __FILE__ ),
+			    array( 'jquery' )
 		);
 
 		wp_localize_script( 'zd-script', 'localizedscript', array( 'ajax_url' => admin_url( 'admin-ajax.php' ) ) );
@@ -78,30 +77,30 @@ class Zip_Downloads{
 	}
 
 	/**
-     * Add the post format support
-     */
-    public static function theme_supports() {
-        add_theme_support( 'post-thumbnails' );
-    }
+         *  Add the post format support
+         */
+        public static function theme_supports() {
+	        add_theme_support( 'post-thumbnails' );
+	}
 
-    /**
-     * Register Settings
-     */
-    public static function register_my_setting(){
+	/**
+	 * Register Settings
+	 */
+	 public static function register_my_setting(){
+	
+	    	register_setting( 'zip_downloads_group', 'zip_downloads' );
+	 }
 
-    	register_setting( 'zip_downloads_group', 'zip_downloads' );
-    }
+       /**
+        * Add Options for the settings page
+        */
+        public static function add_options(){
 
-    /**
-     * Add Options for the settings page
-     */
-    public static function add_options(){
-
-    	$settings = array(
-    		'foundation' => 0
+    		$settings = array(
+    			'foundation' => 0
     		);
 
-    	add_option( 'zip_downloads', $settings ); 
+    		add_option( 'zip_downloads', $settings ); 
 	}
 
 	/**
@@ -161,8 +160,8 @@ class Zip_Downloads{
 	 */
 	public static function change_thumbnail_html( $content ) {
 
-	    if ( 'zip_downloads' == $GLOBALS['post_type'] )
-	      add_filter( 'admin_post_thumbnail_html', array( 'Zip_Downloads', 'do_thumb' ) );
+	        if ( 'zip_downloads' == $GLOBALS['post_type'] )
+	         	add_filter( 'admin_post_thumbnail_html', array( 'Zip_Downloads', 'do_thumb' ) );
 	}
 
 	public static function do_thumb( $content ){
@@ -221,7 +220,7 @@ class Zip_Downloads{
 
 							$output .= '<p id="media-all-banners"><input type="checkbox" name="banners-all" value="all" checked /><label> All Files</label></p>';
 
-					    // the query
+					        // the query
 						$query = new WP_Query( $args );
 
 						if ( $query->have_posts() ) :
@@ -306,44 +305,44 @@ class Zip_Downloads{
 			}
 		}
 
-        ini_set('max_execution_time', 0);
+        	ini_set('max_execution_time', 0);
 
-        $file_name = time() . '_all_banners.zip';
-        $dirname = ABSPATH . trailingslashit( get_option('upload_path') ) . 'zip_downloads';
+        	$file_name = time() . '_all_banners.zip';
+        	$dirname = ABSPATH . trailingslashit( get_option('upload_path') ) . 'zip_downloads';
 
-        if ( !is_dir( $dirname ) )
-        	mkdir( $dirname, 0777, true );
+        	if ( !is_dir( $dirname ) )
+        		mkdir( $dirname, 0777, true );
 
-        $zip_path = $dirname . '/' . $file_name;//location of zip on server. set in construct
+        	$zip_path = $dirname . '/' . $file_name;//location of zip on server. set in construct
 
-        $files_to_zip = $all_file_paths;
+        	$files_to_zip = $all_file_paths;
 
-        if( count( $files_to_zip ) ){//check we have valid files
+        	if( count( $files_to_zip ) ){//check we have valid files
 
-            $zip = new ZipArchive;
-            $opened = $zip->open( $zip_path, ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE );
+	            	$zip = new ZipArchive;
+	            	$opened = $zip->open( $zip_path, ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE );
 
-            if( $opened !== true ){
+	            	if( $opened !== true ){
+	
+	                	die("cannot open file.zip for writing. Please try again in a moment.");
+	
+	            	}//endif
+	
+	            	foreach ( $files_to_zip as $file ) {
+	
+	                     	$short_name = basename( $file );
+	                     	$zip->addFile( $file, $short_name );
+	
+	                }//end foreach
 
-                die("cannot open file.zip for writing. Please try again in a moment.");
+            		$zip->close();
 
-            }//endif
+        	}//endif
 
-            foreach ( $files_to_zip as $file ) {
+    		$download_link = trailingslashit( get_site_url() ) . trailingslashit( get_option('upload_path') ) . 'zip_downloads'. '/' . $file_name;
+    		echo $download_link;
 
-                    $short_name = basename( $file );
-                    $zip->addFile( $file, $short_name );
-
-            }//end foreach
-
-            $zip->close();
-
-        }//endif
-
-    	$download_link = trailingslashit( get_site_url() ) . trailingslashit( get_option('upload_path') ) . 'zip_downloads'. '/' . $file_name;
-    	echo $download_link;
-
-        die();
+        	die();
 
 	}//end build_zip
 
@@ -353,26 +352,26 @@ class Zip_Downloads{
 	 */
 	public static function delete_directory() {
 
-    	$dirname = ABSPATH . trailingslashit( get_option('upload_path') ) . 'zip_downloads';
-
-        if ( is_dir( $dirname ) )
-        	$dir_handle = opendir( $dirname ); 
-
-        if ( !$dir_handle )
+	    	$dirname = ABSPATH . trailingslashit( get_option('upload_path') ) . 'zip_downloads';
+	
+	        if ( is_dir( $dirname ) )
+	        	$dir_handle = opendir( $dirname ); 
+	
+	        if ( !$dir_handle )
 			return false;
-
-        while( $file = readdir( $dir_handle ) ) {
-
-            if ( $file != "." && $file != ".." ) {
-                if ( !is_dir( $dirname . "/" . $file ) )             
-                	unlink( $dirname . "/" . $file );                     
-            }    
-        } 
-
-        closedir( $dir_handle );
-        rmdir( $dirname );        
-        return true; 
-    }
+	
+	        while( $file = readdir( $dir_handle ) ) {
+	
+	            	if ( $file != "." && $file != ".." ) {
+	                	if ( !is_dir( $dirname . "/" . $file ) )             
+	                		unlink( $dirname . "/" . $file );                     
+	            	}    
+	        } 
+	
+	        closedir( $dir_handle );
+	        rmdir( $dirname );        
+	        return true; 
+    	}
 
 	/**
 	 * Add a submenu
@@ -397,7 +396,7 @@ class Zip_Downloads{
 
     			<h3>Shortcode</h3>
 
-    			<p><em>Add the below shortcode to a page to display the files to download</em></p>
+    			<p><em>Add the below shortcode to a page to display the files available for download</em></p>
 
     			<p>[zip_downloads]</p>
 
@@ -415,13 +414,13 @@ class Zip_Downloads{
 
 	    								foreach ( $styles as $style ) {
 	    									
-											$select = $zip_downloads['style'] == $style ? 'selected' : ''; ?>
+										$select = $zip_downloads['style'] == $style ? 'selected' : ''; ?>
 										
-											<option value="<?php echo $style; ?>" <?php echo $select; ?>><?php echo $style; ?></option>
+										<option value="<?php echo $style; ?>" <?php echo $select; ?>><?php echo $style; ?></option>
 
 	    								<?php } ?>
 
-									</select>
+								</select>
     							</td>
     						</tr>
     					</tbody>
@@ -431,7 +430,6 @@ class Zip_Downloads{
 			</form>
 		</div>
 		<?php
-
 	}
 
 	/**
